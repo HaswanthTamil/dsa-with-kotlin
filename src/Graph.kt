@@ -1,5 +1,6 @@
 import utils.Queue
 import utils.Stack
+import java.awt.GradientPaint
 
 class GraphNode<T>(var data: T, val id: Int) {
     val neighbours =  mutableSetOf<GraphNode<T>>()
@@ -117,10 +118,66 @@ fun <P> bfs(
     return target == null
 }
 
+fun <P> findPath(source: GraphNode<P>, target: GraphNode<P>): List<GraphNode<P>>? {
+    val queue = Queue<GraphNode<P>>()
+    val seen = mutableSetOf<GraphNode<P>>()
+    val parent = mutableMapOf<GraphNode<P>, GraphNode<P>?>()
+
+    queue.enqueue(source)
+    seen.add(source)
+    parent[source] = null
+
+    while (!queue.isEmpty()) {
+        val curr = queue.dequeue()
+
+        if (curr == target) break
+
+        for (n in curr.neighbours) {
+            if (n !in seen) {
+                seen.add(n)
+                parent[n] = curr
+                queue.enqueue(n)
+            }
+        }
+    }
+
+    if(target !in parent.keys) return null
+
+    val path = mutableListOf<GraphNode<P>>()
+    var curr: GraphNode<P>? = target
+
+    while (curr != null) {
+        path.add(curr)
+        curr = parent[curr]
+    }
+
+    return path.reversed()
+}
+
+fun <P> hasCycle(start: GraphNode<P>): Boolean {
+    val stack = Stack<GraphNode<P>>()
+    val seen = mutableSetOf<GraphNode<P>>()
+
+    stack.push(start)
+    seen.add(start)
+
+    while (!stack.isEmpty()) {
+        val curr = stack.pop()
+
+        for (n in curr.neighbours) {
+            if (n in seen) {
+                return true
+            } else {
+                seen.add(n)
+                stack.push(n)
+            }
+        }
+    }
+
+    return false
+}
 
 /*
-findPath
-hasCycle
 addEdge(u, v, weight)
 getWeight
 updateWeight
